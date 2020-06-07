@@ -10,7 +10,14 @@ import (
 
 func todos(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var todos []Todo
-	Db.Find(&todos)
+	queryValues := r.URL.Query()
+	limit, err := strconv.Atoi(queryValues.Get("_limit"))
+
+	if err == nil {
+		Db.Limit(limit).Find(&todos)
+	} else {
+		Db.Find(&todos)
+	}
 
 	output, err := json.MarshalIndent(&todos, "", "\t")
 	if err != nil {
