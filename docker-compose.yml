@@ -1,0 +1,26 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: todo
+      POSTGRES_PASSWORD: todo
+      POSTGRES_DB: todo
+    ports:
+      - "5432:5432"
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7001:8080"
+    depends_on:
+      - db
+    links:
+      - db
+    environment:
+      - EXPOSE_PORT:8080
+      - PGHOST=db
+      - PGUSER=todo
+      - PGPASS=todo
+      - PGDB=todo

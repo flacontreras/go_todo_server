@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -14,11 +13,7 @@ type Todo struct {
 	Completed bool   `json:"completed"`
 }
 
-var todos []Todo
-var idGenerator uuid.UUID
-
 func handleOptions(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Test cors")
 	if r.Header.Get("Access-Control-Request-Method") != "" {
 		// Set CORS headers
 		header := w.Header()
@@ -32,22 +27,14 @@ func handleOptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	idGenerator = uuid.New()
-	todos = []Todo{
-		Todo{Id: 1, Title: "Todo One", Completed: false},
-		Todo{Id: 2, Title: "Todo Two", Completed: false},
-		Todo{Id: 3, Title: "Todo Three", Completed: false},
-	}
-
 	mux := httprouter.New()
 	mux.GlobalOPTIONS = http.HandlerFunc(handleOptions)
-	mux.GET("/todos", getTodos)
+	mux.GET("/todos", todos)
 	mux.POST("/todos", addTodo)
 	mux.DELETE("/todos/:id", deleteTodo)
 
 	server := http.Server{
-		Addr:    "127.0.0.1:7001",
+		Addr:    "0.0.0.0:8080",
 		Handler: mux,
 	}
 

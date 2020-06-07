@@ -2,18 +2,21 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func getTodos(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Println("Getting todo")
+func todos(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	var todos []Todo
+	Db.Find(&todos)
+
 	output, err := json.MarshalIndent(&todos, "", "\t")
 	if err != nil {
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	_, _ = w.Write(output)
@@ -31,7 +34,7 @@ func addTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	var todo Todo
 	_ = json.Unmarshal(body, &todo)
-	todo.Id = idGenerator.ClockSequence()
+	Db.Create(&todo)
 
 	output, err := json.MarshalIndent(&todo, "", "\t")
 	if err != nil {
@@ -46,4 +49,13 @@ func deleteTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	id, err := strconv.Atoi(p.ByName("id"))
+	if err != nil {
+		return
+	}
+
+	var todo Todo
+	Db.Where("id = ?", id).First(&todo)
+	Db.Delete(&todo)
 }
