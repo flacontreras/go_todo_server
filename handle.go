@@ -54,7 +54,7 @@ func addTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 func deleteTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 	id, err := strconv.Atoi(p.ByName("id"))
@@ -65,4 +65,28 @@ func deleteTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	var todo Todo
 	Db.Where("id = ?", id).First(&todo)
 	Db.Delete(&todo)
+}
+
+func updateTodo(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "PUT")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+	id, err := strconv.Atoi(p.ByName("id"))
+	if err != nil {
+		return
+	}
+
+	var todo, updatedTodo Todo
+	Db.Where("id = ?", id).First(&todo)
+
+	len := r.ContentLength
+	body := make([]byte, len)
+	_, _ = r.Body.Read(body)
+
+	_ = json.Unmarshal(body, &updatedTodo)
+	// If changing complete to false this way, Gorm won't update
+	// Db.Model(&todo).Updates(&updatedTodo)
+	Db.Save(&updatedTodo)
 }

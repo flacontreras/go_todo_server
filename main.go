@@ -31,6 +31,7 @@ func main() {
 	mux.GlobalOPTIONS = http.HandlerFunc(handleOptions)
 	mux.GET("/todos", todos)
 	mux.POST("/todos", addTodo)
+	mux.PUT("/todos/:id", updateTodo)
 	mux.DELETE("/todos/:id", deleteTodo)
 
 	server := http.Server{
